@@ -1,3 +1,4 @@
+#include "Card.hpp"
 #ifndef QUEUE
 #define QUEUE
 
@@ -7,7 +8,7 @@
 
 #include <iostream>
 using namespace std;
-typedef int QueueElement;
+typedef Card QueueElement;
 const int DEFAULT_CAPACITY = 128;
 
 class Queue {
@@ -22,7 +23,9 @@ public:
     void display(ostream& out) const;
     QueueElement front() const;
     void dequeue();
-
+    void deleteDeck();
+    void printCards();
+    void createShuffledDeck(int numPairs);
 private:
 #ifdef SQUEUE
     QueueElement myArray[DEFAULT_CAPACITY];

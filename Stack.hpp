@@ -1,3 +1,5 @@
+#include "Card.hpp"
+
 #ifndef STACK
 #define STACK
 
@@ -14,7 +16,7 @@
 
 #include <iostream>
 using namespace std;
-typedef int StackElement;
+typedef Card StackElement;
 const int DEFAULT_CAPACITY = 128;
 
 class Stack {

@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Card.h" />
+    <ClInclude Include="Card.hpp" />
     <ClInclude Include="Queue.hpp" />
     <ClInclude Include="Stack.hpp" />
   </ItemGroup>

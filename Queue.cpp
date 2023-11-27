@@ -1,4 +1,6 @@
 #include "Queue.hpp"
+#include "Card.hpp"
+
 #ifdef LLQUEUE
 
 Queue::Queue(int) : myFront(NULL), myBack(NULL) {} // numElements is ignored
@@ -68,7 +70,7 @@ void Queue::display(ostream& out) const {
     }
     Queue::NodePointer myPtr = myFront;
     while (myPtr != NULL) {
-        out << myPtr->data << ' ';
+        out << myPtr->data.CardName << ' ';
         myPtr = myPtr->next;
     }
     out << endl;
@@ -101,5 +103,49 @@ ostream& operator<< (ostream& out, const Queue& aQueue) {
     aQueue.display(out);
     return out;
 }
+// Function to shuffle a deck of cards into the queue
+void Queue::createShuffledDeck( int numPairs) {
+    // Create an array to store the cards
+    Card cards[12];
 
+    // Populate the array with pairs of cards
+    for (int i = 0; i < numPairs; ++i) {
+        
+        cards[i * 2] = Card(i + 1);
+        cards[i * 2 + 1] = Card(i + 1);
+    }
+
+    // Seed the random number generator
+    std::srand(std::time(0));
+
+    // Shuffle the cards using Fisher-Yates algorithm
+    for (int i = numPairs * 2 - 1; i > 0; --i) {
+        int j = std::rand() % (i + 1);
+        std::swap(cards[i], cards[j]);
+    }
+
+    // Build the queue
+    for (int i = 0; i < numPairs * 2; ++i) {
+        enqueue(cards[i]);
+    }
+}
+
+// Function to print the cards in the queue
+void Queue::printCards() {
+    Node* current = myFront;
+    while (current != nullptr) {
+        std::cout << current->data.CardName << " ";
+        current = current->next;
+    }
+    std::cout << std::endl;
+}
+
+// Function to free memory allocated for the queue 
+void Queue::deleteDeck() {
+    while (myFront != nullptr) {
+        Node* temp = myFront;
+        myFront = myFront->next;
+        delete temp;
+    }
+}
 #endif // LLQUEUE
