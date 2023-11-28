@@ -11,7 +11,7 @@ public:
 
 	string CardName;
 	//image CardImage;
-	bool isShown ;
+	bool isShown;
 	Card();
 	Card(string x);
 	Card(int value);
