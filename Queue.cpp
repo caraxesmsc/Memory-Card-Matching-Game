@@ -1,151 +1,152 @@
 #include "Queue.hpp"
 #include "Card.hpp"
 
-#ifdef LLQUEUE
-
-Queue::Queue(int) : myFront(NULL), myBack(NULL) {} // numElements is ignored
+Queue::Queue() {
+}
+Queue::Queue(int numElements) {
+    myFront = myBack = nullptr;
+#ifndef LLQUEUE
+    myCapacity = numElements;
+#endif
+}
 
 Queue::Queue(const Queue& original) {
-    if (original.empty()) {
-        myFront = myBack = NULL;
-    }
-    else {
-        myFront = myBack = new Queue::Node(original.front());
-        Queue::NodePointer origPtr = original.myFront->next;
-        while (origPtr != NULL) {
-            myBack->next = new Queue::Node(origPtr->data);
-            myBack = myBack->next;
-            origPtr = origPtr->next;
-        }
+    myFront = myBack = nullptr;
+#ifndef LLQUEUE
+    myCapacity = original.myCapacity;
+#endif
+    if (!original.empty()) {
+        *this = original;
     }
 }
 
 Queue::~Queue() {
-    Queue::NodePointer currPtr = myFront, nextPtr = NULL;
-    while (currPtr != NULL) {
-        nextPtr = currPtr->next;
-        delete currPtr;
-        currPtr = nextPtr;
-    }
+    deleteQueue();
 }
 
-const Queue& Queue::operator=(const Queue& rhs) {
+const Queue& Queue::operator= (const Queue& rhs) {
     if (this != &rhs) {
-        this->~Queue();
-        if (rhs.empty()) {
-            myFront = myBack = NULL;
+        deleteQueue();
+#ifdef LLQUEUE
+        Node* rhsCurrent = rhs.myFront;
+        while (rhsCurrent != nullptr) {
+            enqueue(rhsCurrent->data);
+            rhsCurrent = rhsCurrent->next;
         }
-        else {
-            myFront = myBack = new Queue::Node(rhs.front());
-            Queue::NodePointer rhsPtr = rhs.myFront->next;
-            while (rhsPtr != NULL) {
-                myBack->next = new Queue::Node(rhsPtr->data);
-                myBack = myBack->next;
-                rhsPtr = rhsPtr->next;
-            }
+#else
+        myBack = myFront + (rhs.myBack - rhs.myFront);
+        for (int i = 0; i <= rhs.myBack; ++i) {
+            myArray[i] = rhs.myArray[i];
         }
+#endif
     }
     return *this;
 }
 
 bool Queue::empty() const {
-    return myFront == NULL;
+    return myFront == nullptr;
 }
 
 void Queue::enqueue(const QueueElement& value) {
-    Queue::NodePointer newptr = new Queue::Node(value);
+#ifdef LLQUEUE
+    Node* newNode = new Node(value);
     if (empty()) {
-        myFront = myBack = newptr;
+        myFront = myBack = newNode;
     }
     else {
-        myBack->next = newptr;
-        myBack = newptr;
+        myBack->next = newNode;
+        myBack = newNode;
     }
+#else
+    if (myBack >= myCapacity - 1) {
+        cerr << "Queue Full!" << endl;
+    }
+    else {
+        myBack = (myBack + 1) % myCapacity;
+        myArray[myBack] = value;
+        if (myFront == -1) {
+            myFront = 0;
+        }
+    }
+#endif
 }
 
 void Queue::display(ostream& out) const {
-    if (empty()) {
-        cerr << "Queue-empty!" << endl;
-        return;
-    }
-    Queue::NodePointer myPtr = myFront;
-    while (myPtr != NULL) {
-        out << myPtr->data.CardName << ' ';
-        myPtr = myPtr->next;
+    Node* current = myFront;
+    while (current != nullptr) {
+        out << current->data.CardName << " ";
+        current = current->next;
     }
     out << endl;
 }
 
 QueueElement Queue::front() const {
-    if (!empty())
-        return myFront->data;
+    if (empty()) {
+        cerr << "Queue Empty!" << endl;
+        return QueueElement();
+    }
     else {
-        cerr << "Queue Empty -- Returning garbage." << endl;
-        QueueElement garbage;
-        return garbage;
+        return myFront->data;
     }
 }
 
 void Queue::dequeue() {
-    if (!empty()) {
-        Queue::NodePointer ptr = myFront;
-        myFront = myFront->next;
-        delete ptr;
-        if (myFront == NULL)     // queue is now empty
-            myBack = NULL;
+    if (empty()) {
+        cout << "Queue Empty!" << endl;
     }
     else {
-        cerr << "Queue Empty!" << endl;
+#ifdef LLQUEUE
+        Node* temp = myFront;
+        myFront = myFront->next;
+        if (myFront == nullptr) {
+            myBack = nullptr;
+        }
+        delete temp;
+#else
+        myFront = (myFront + 1) % myCapacity;
+#endif
     }
 }
 
-ostream& operator<< (ostream& out, const Queue& aQueue) {
-    aQueue.display(out);
-    return out;
-}
-// Function to shuffle a deck of cards into the queue
-void Queue::createShuffledDeck( int numPairs) {
-    // Create an array to store the cards
-    Card cards[12];
-
-    // Populate the array with pairs of cards
-    for (int i = 0; i < numPairs; ++i) {
-        
-        cards[i * 2] = Card(i + 1);
-        cards[i * 2 + 1] = Card(i + 1);
-    }
-
-    // Seed the random number generator
-    std::srand(std::time(0));
-
-    // Shuffle the cards using Fisher-Yates algorithm
-    for (int i = numPairs * 2 - 1; i > 0; --i) {
-        int j = std::rand() % (i + 1);
-        std::swap(cards[i], cards[j]);
-    }
-
-    // Build the queue
-    for (int i = 0; i < numPairs * 2; ++i) {
-        enqueue(cards[i]);
-    }
-}
-
-// Function to print the cards in the queue
-void Queue::printCards() {
-    Node* current = myFront;
-    while (current != nullptr) {
-        std::cout << current->data.CardName << " ";
-        current = current->next;
-    }
-    std::cout << std::endl;
-}
-
-// Function to free memory allocated for the queue 
-void Queue::deleteDeck() {
+void Queue::deleteQueue() {
     while (myFront != nullptr) {
         Node* temp = myFront;
         myFront = myFront->next;
         delete temp;
     }
+    myBack = nullptr;
 }
-#endif // LLQUEUE
+
+void Queue::printCards() {
+    Node* current = myFront;
+    while (current != nullptr) {
+        cout << current->data.CardName << " ";
+        current = current->next;
+    }
+    cout << endl;
+}
+
+void Queue::createShuffledDeck() {
+    // Create an array to store the cards
+    Card cards[12];
+    std::string SUIT_NAMES[4] = { "Hearts", "Spades", "Clubs", "Diamonds" };
+    // Populate the array with Card objects
+    for (int i = 0; i < 4; i++) {
+        cards[i] = Card("Ace of " + string(SUIT_NAMES[i]));
+        cards[i + 4] = Card("2 of " + string(SUIT_NAMES[i]));
+        cards[i + 8] = Card("3 of " + string(SUIT_NAMES[i]));
+    }
+
+    // Shuffle the cards array
+    for (int i = 0; i < 12; i++) {
+        int index = rand() % 12;
+        Card temp = cards[i];
+        cards[i] = cards[index];
+        cards[index] = temp;
+    }
+
+    // Add the shuffled cards to the deck
+    for (int i = 0; i < 12; i++) {
+        enqueue(cards[i]);
+    }
+}

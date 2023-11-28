@@ -1,6 +1,6 @@
-#include "Queue.cpp"
-#include "Stack.cpp"
-#include "Card.cpp"
+#include "Queue.hpp"
+#include "Stack.hpp"
+#include "Card.hpp"
 
 #include <iostream>
 #include <ctime>
@@ -9,15 +9,15 @@
 using namespace std;
 int main() {
     Queue myQueue;
-    int numPairs = 6;  
 
-    myQueue.createShuffledDeck(numPairs);
 
-    std::cout << "Shuffled Deck: ";
+    myQueue.createShuffledDeck();
+
+    cout << "Shuffled Deck: ";
     myQueue.printCards();
 
     // Don't forget to free memory
-    myQueue.deleteDeck();
+    myQueue.deleteQueue();
 
     return 0;
 

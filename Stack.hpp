@@ -17,8 +17,7 @@
 #include <iostream>
 using namespace std;
 typedef Card StackElement;
-const int DEFAULT_CAPACITY = 128;
-
+const int DEFAULT_CAPACITY = 10;
 class Stack {
 
 public:

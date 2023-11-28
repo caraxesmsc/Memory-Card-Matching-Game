@@ -11,11 +11,11 @@ public:
 
 	string CardName;
 	//image CardImage;
-	bool isShown;
-
+	bool isShown ;
 	Card();
 	Card(string x);
 	Card(int value);
+	//Card(const std::string& name, bool shown = false): CardName(name), isShown(shown) {}
 
 };
 #endif // CARD_H
