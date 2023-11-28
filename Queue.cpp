@@ -1,111 +1,134 @@
 #include "Queue.hpp"
-#include "Card.hpp"
+#include "Card.h"
 
-Queue::Queue() {
-}
-Queue::Queue(int numElements) {
-    myFront = myBack = nullptr;
-#ifndef LLQUEUE
-    myCapacity = numElements;
-#endif
-}
+//--- Definition of Queue constructor
+Queue::Queue()
+    : myFront(0), myBack(0)
+{}
 
-Queue::Queue(const Queue& original) {
-    myFront = myBack = nullptr;
-#ifndef LLQUEUE
-    myCapacity = original.myCapacity;
-#endif
-    if (!original.empty()) {
-        *this = original;
+//--- Definition of Queue copy constructor
+Queue::Queue(const Queue& original)
+{
+    myFront = myBack = 0;
+    if (!original.empty())
+    {
+        // Copy first node
+        myFront = myBack = new Queue::Node(original.front());
+
+        // Set pointer to run through original's linked list
+        Queue::NodePointer origPtr = original.myFront->next;
+        while (origPtr != 0)
+        {
+            myBack->next = new Queue::Node(origPtr->data);
+            myBack = myBack->next;
+            origPtr = origPtr->next;
+        }
     }
 }
 
-Queue::~Queue() {
-    deleteQueue();
+//--- Definition of Queue destructor
+Queue::~Queue()
+{
+    // Set pointer to run through the queue
+    Queue::NodePointer prev = myFront,
+        ptr;
+    while (prev != 0)
+    {
+        ptr = prev->next;
+        delete prev;
+        prev = ptr;
+    }
 }
 
-const Queue& Queue::operator= (const Queue& rhs) {
-    if (this != &rhs) {
-        deleteQueue();
-#ifdef LLQUEUE
-        Node* rhsCurrent = rhs.myFront;
-        while (rhsCurrent != nullptr) {
-            enqueue(rhsCurrent->data);
-            rhsCurrent = rhsCurrent->next;
+//--- Definition of assignment operator
+const Queue& Queue::operator=(const Queue& rightHandSide)
+{
+    if (this != &rightHandSide)         // check that not q = q
+    {
+        this->~Queue();                  // destroy current linked list
+        if (rightHandSide.empty())       // empty queue
+            myFront = myBack = 0;
+        else
+        {                                // copy rightHandSide's list
+            // Copy first node
+            myFront = myBack = new Queue::Node(rightHandSide.front());
+
+            // Set pointer to run through rightHandSide's linked list
+            Queue::NodePointer rhsPtr = rightHandSide.myFront->next;
+            while (rhsPtr != 0)
+            {
+                myBack->next = new Queue::Node(rhsPtr->data);
+                myBack = myBack->next;
+                rhsPtr = rhsPtr->next;
+            }
         }
-#else
-        myBack = myFront + (rhs.myBack - rhs.myFront);
-        for (int i = 0; i <= rhs.myBack; ++i) {
-            myArray[i] = rhs.myArray[i];
-        }
-#endif
     }
     return *this;
 }
 
-bool Queue::empty() const {
-    return myFront == nullptr;
+//--- Definition of empty()
+bool Queue::empty() const
+{
+    return (myFront == 0);
 }
 
-void Queue::enqueue(const QueueElement& value) {
-#ifdef LLQUEUE
-    Node* newNode = new Node(value);
-    if (empty()) {
-        myFront = myBack = newNode;
+//--- Definition of enqueue()
+void Queue::enqueue(const Card& value)
+{
+    Queue::NodePointer newptr = new Queue::Node(value);
+    if (empty())
+        myFront = myBack = newptr;
+    else
+    {
+        myBack->next = newptr;
+        myBack = newptr;
     }
-    else {
-        myBack->next = newNode;
-        myBack = newNode;
-    }
-#else
-    if (myBack >= myCapacity - 1) {
-        cerr << "Queue Full!" << endl;
-    }
-    else {
-        myBack = (myBack + 1) % myCapacity;
-        myArray[myBack] = value;
-        if (myFront == -1) {
-            myFront = 0;
-        }
-    }
-#endif
 }
 
-void Queue::display(ostream& out) const {
-    Node* current = myFront;
-    while (current != nullptr) {
-        out << current->data.CardName << " ";
-        current = current->next;
-    }
+//--- Definition of display()
+void Queue::display(ostream& out) const
+{
+    Queue::NodePointer ptr;
+    for (ptr = myFront; ptr != 0; ptr = ptr->next)
+        out << ptr->data.CardName << "  ";
     out << endl;
+
 }
 
-QueueElement Queue::front() const {
-    if (empty()) {
-        cerr << "Queue Empty!" << endl;
-        return QueueElement();
-    }
-    else {
-        return myFront->data;
-    }
+//--- Definition of output operator
+ostream& operator<< (ostream& out, const Queue& aQueue) {
+    aQueue.display(out);
+    return out;
 }
 
-void Queue::dequeue() {
-    if (empty()) {
-        cout << "Queue Empty!" << endl;
-    }
-    else {
-#ifdef LLQUEUE
-        Node* temp = myFront;
-        myFront = myFront->next;
-        if (myFront == nullptr) {
-            myBack = nullptr;
-        }
+//--- Definition of front()
+Card Queue::front() const
+{
+    if (!empty())
+        return (myFront->data);
+    else
+    {
+        cerr << "*** Queue is empty " << " -- returning garbage ***\n";
+        Card* temp = new(Card);
+        Card garbage = *temp;     // "Garbage" value
         delete temp;
-#else
-        myFront = (myFront + 1) % myCapacity;
-#endif
+        return garbage;
     }
+}
+
+//--- Definition of dequeue()
+void Queue::dequeue()
+{
+    if (!empty())
+    {
+        Queue::NodePointer ptr = myFront;
+        myFront = myFront->next;
+        delete ptr;
+        if (myFront == 0)     // queue is now empty
+            myBack = 0;
+    }
+    else
+        cerr << "*** Queue is empty -- can't remove a value ***\n";
 }
 
 void Queue::deleteQueue() {
@@ -125,28 +148,97 @@ void Queue::printCards() {
     }
     cout << endl;
 }
-
-void Queue::createShuffledDeck() {
-    // Create an array to store the cards
-    Card cards[12];
-    std::string SUIT_NAMES[4] = { "Hearts", "Spades", "Clubs", "Diamonds" };
-    // Populate the array with Card objects
-    for (int i = 0; i < 4; i++) {
-        cards[i] = Card("Ace of " + string(SUIT_NAMES[i]));
-        cards[i + 4] = Card("2 of " + string(SUIT_NAMES[i]));
-        cards[i + 8] = Card("3 of " + string(SUIT_NAMES[i]));
+bool Queue::ismatched(Queue& card1, Queue& card2) {
+    if (card1.empty() || card2.empty()) {
+        return false;
     }
+    Card match1 = card1.front();
+    Card match2 = card2.front();
 
-    // Shuffle the cards array
+    return (match1.CardName == match2.CardName);
+}
+bool Queue::checkMatch(int loc1, int loc2, Queue& card1, Queue& card2) {
+
+    Queue::Node* head1 = myFront;
+    Queue::Node* head2 = myFront;
+
+    for (int i = 0; i < loc1; i++) {
+        head1 = head1->next;
+    }
+    for (int i = 0; i < loc2; i++) {
+        head2 = head2->next;
+    }
+    card1.enqueue(head1->data);
+    cout << " Card 1 enqueued";
+    card2.enqueue(head2->data);
+    cout << " Card 2 enqueued";
+
+    if (head1->data.CardName == head2->data.CardName) {
+        head1->data.isShown = true;
+        head2->data.isShown = true;
+        return true;
+    }
+    return false;
+}
+
+void Queue::displayGrid() {
+    Node* current = myFront;
     for (int i = 0; i < 12; i++) {
-        int index = rand() % 12;
-        Card temp = cards[i];
-        cards[i] = cards[index];
-        cards[index] = temp;
+        if (current->data.isShown) {
+            cout << " (" << current->data.CardName << ")";
+
+        }
+        else {
+            cout << " [" << i << "]";
+        }
+        if ((i + 1) % 3 == 0) {
+            cout << endl;
+        }
+        current = current->next;
     }
+}
+void Queue::createShuffledQueue() {
+
+    // Generate an array of indices from 0 to 5 (representing pairs)
+    int indices[6];
+    for (int i = 0; i < 6; ++i) {
+        indices[i] = i;
+    }
+
+    // Duplicate indices to create pairs
+    int shuffledIndices[12];
+    for (int i = 0; i < 6; ++i) {
+        shuffledIndices[i * 2] = indices[i];
+        shuffledIndices[i * 2 + 1] = indices[i];
+    }
+
+    // Shuffle the indices array
+    shuffleArray(shuffledIndices, 12);
 
     // Add the shuffled cards to the deck
-    for (int i = 0; i < 12; i++) {
-        enqueue(cards[i]);
+    for (int i = 0; i < 12; ++i) {
+        enqueue(Card(shuffledIndices[i] * 2));
     }
+}
+
+// Custom shuffle function (Fisher-Yates algorithm)
+void Queue::shuffleArray(int arr[], int size) {
+    for (int i = size - 1; i > 0; --i) {
+        int j = rand() % (i + 1);
+        // Swap arr[i] and arr[j]
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+}
+int Queue::chooseCard() {
+    int loc;
+    Queue::Node* head1 = myFront;
+    cout << "Enter location (0-11): ";
+    cin >> loc;
+    for (int i = 0; i < loc; i++) {
+        head1 = head1->next;
+    }
+    cout << "you chose location " << loc << " card is " << head1->data.CardName << endl;
+    return loc;
 }
