@@ -1,4 +1,4 @@
-#include "Card.hpp"
+#include "Card.h"
 #include <string>
 using namespace std;
 
@@ -30,5 +30,5 @@ Card::Card(int value) : isShown(false) {
         }
     }
 
-    
+
 }
