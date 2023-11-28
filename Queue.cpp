@@ -1,8 +1,9 @@
 #include "Queue.hpp"
 #ifdef LLQUEUE
 
-Queue::Queue(int) : myFront(NULL), myBack(NULL) {} // numElements is ignored
-
+Queue::Queue(int numElements) : myFront(NULL), myBack(NULL), myArray(new QueueElement[numElements]) {
+    // Initialize other variables if needed
+}
 Queue::Queue(const Queue& original) {
     if (original.empty()) {
         myFront = myBack = NULL;
@@ -84,6 +85,8 @@ QueueElement Queue::front() const {
     }
 }
 
+
+// Example in Queue.cpp
 void Queue::dequeue() {
     if (!empty()) {
         Queue::NodePointer ptr = myFront;
@@ -95,11 +98,42 @@ void Queue::dequeue() {
     else {
         cerr << "Queue Empty!" << endl;
     }
+
+    // Initialize garbage with a value
+    QueueElement garbage = 0;  // Assign a meaningful value
 }
+
 
 ostream& operator<< (ostream& out, const Queue& aQueue) {
     aQueue.display(out);
     return out;
 }
 
+void Queue::displayGrid() {
+    //Node* head = cardQueue.myFront;
+
+        for (int i = 0; i < 12; i++) {
+            cout << " [" << i << "]";
+            if ((i + 1) % 3 == 0) {
+                cout << endl;
+            }
+            //head = head->next;
+        }
+        
+    
+}
+bool Queue::isMatched(int loc1, int loc2) {
+    Queue::Node * head1 = myFront;
+    Queue::Node * head2 = myFront;
+    
+    for (int i = 0; i < loc1; i++){
+        head1 = head1->next;
+    }
+    for (int i = 0; i < loc2; i++){
+        head2 = head2->next;
+    }
+    return head1->data == head2->data;
+}
+
 #endif // LLQUEUE
+

@@ -22,8 +22,10 @@ public:
     void display(ostream& out) const;
     QueueElement front() const;
     void dequeue();
-
-private:
+    //void displayGrid(Queue& cardQueue);
+    void displayGrid();
+    bool isMatched(int loc1, int loc2);
+    private:
 #ifdef SQUEUE
     QueueElement myArray[DEFAULT_CAPACITY];
 #else

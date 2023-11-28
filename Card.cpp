@@ -1,4 +1,4 @@
-#include "Card.h"
+
 #include <string>
 using namespace std;
 class Card
@@ -22,4 +22,5 @@ Card::Card(string x)
 	CardName = x;
 	isShown = false;
 }
+
 
