@@ -1,52 +1,82 @@
-#ifndef QUEUE
-#define QUEUE
 
-// #define SQUEUE
-// #define DQUEUE
-#define LLQUEUE
-
+#ifndef Queue_hpp
+#define Queue_hpp
+#include "Card.h"
+#include <stdio.h>
 #include <iostream>
 using namespace std;
-typedef int QueueElement;
-const int DEFAULT_CAPACITY = 128;
 
-class Queue {
 
+class Queue
+{
 public:
-    Queue(int numElements = DEFAULT_CAPACITY);
+
+    Queue();
+
     Queue(const Queue& original);
     ~Queue();
-    const Queue& operator= (const Queue& rhs);
+    const Queue& operator= (const Queue& rightHandSide);
+
     bool empty() const;
-    void enqueue(const QueueElement& value);
+
+    void enqueue(const Card& value);
+
     void display(ostream& out) const;
-    QueueElement front() const;
+
+    Card front() const;
+
     void dequeue();
-    //void displayGrid(Queue& cardQueue);
+
+    void deleteQueue();
+
+    void printCards();
+
     void displayGrid();
-    bool isMatched(int loc1, int loc2);
-    private:
-#ifdef SQUEUE
-    QueueElement myArray[DEFAULT_CAPACITY];
-#else
-    QueueElement* myArray;
-#endif
+
+    void createShuffledQueue(int* array);
+
+    void shuffleArray(int arr[], int size);
+
+    bool ismatched(Queue& card1, Queue& card2);
+
+    bool checkMatch(int loc1, int loc2);
+    int chooseCard();
+    bool isGameOver(int n);
+    bool checkMatchHard(Card card1, int loc2);
+    void searchCard(Card card1);
+    bool checkMatchCards(Card card1, Card card2);
+    /*void shufflequeue(Queue<int> q);
+    void arrayToQueue(int* arr);
+    void shuffleArray(int arr[]);
+    int* queueToArray(Queue<int> q);*/
 
 
-#ifdef LLQUEUE
-    class Node {
+
+    //private:
+        /*** Node class ***/
+    class Node
+    {
     public:
-        QueueElement data;
+        Card data;
         Node* next;
-        Node(QueueElement value, Node* link = 0) : data(value), next(link) {}
+        //--- Node constructor
+        Node(Card value, Node* link = 0)
+        {
+            data = value; next = link;
+        }
+
     };
     typedef Node* NodePointer;
-    NodePointer myFront, myBack;
-#else
-    int myFront, myBack, myCapacity;
-#endif
-};
 
+    /***** Data Members *****/
+    NodePointer myFront,      // pointer to front of queue
+        myBack;         // pointer to back of queue
+
+
+}; // end of class declaration
+
+//------ Prototype of output operator
 ostream& operator<< (ostream& out, const Queue& aList);
 
-#endif /* QUEUE */
+
+#endif /* Queue_hpp */
